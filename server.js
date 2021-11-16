@@ -213,6 +213,16 @@ app.get('/audienceCount', async (req, res) => {
   });
 });
 
+/**
+ * Stop watching the stream
+ */
+app.post('/audienceLeave', async (req, res) => {
+  // increment the viewer counter
+  await redisDecr('live_viewer_count');
+
+  return res.send({});
+});
+
 // Start the Express server
 app.listen(port, async () => {
   console.log(`Express server running on port ${port}`);

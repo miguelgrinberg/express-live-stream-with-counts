@@ -35,12 +35,22 @@ const watchStream = async () => {
   }
 }
 
-const leaveStream = () => {
-  player.disconnect();
-  watchingStream = false;
-  startEndButton.innerHTML = 'watch stream';
-  startEndButton.classList.replace('bg-red-500', 'bg-green-500');
-  startEndButton.classList.replace('hover:bg-red-500', 'hover:bg-green-700');
+const leaveStream = async () => {
+  if (watchingStream) {
+    player.disconnect();
+    watchingStream = false;
+    startEndButton.innerHTML = 'watch stream';
+    startEndButton.classList.replace('bg-red-500', 'bg-green-500');
+    startEndButton.classList.replace('hover:bg-red-500', 'hover:bg-green-700');
+    try {
+      await fetch('/audienceLeave', {
+        method: 'POST',
+      });
+    }
+    catch (error) {
+      console.log(error);
+    }
+  }
 }
 
 const watchOrLeaveStream = async (event) => {
@@ -49,8 +59,9 @@ const watchOrLeaveStream = async (event) => {
     await watchStream();
   }
   else {
-    leaveStream();
+    await leaveStream();
   }
 };
 
 startEndButton.addEventListener('click', watchOrLeaveStream);
+window.addEventListener('beforeunload', leaveStream);
