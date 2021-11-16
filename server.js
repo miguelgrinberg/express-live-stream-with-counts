@@ -188,6 +188,9 @@ app.post('/audienceToken', async (req, res) => {
     token.addGrant(wrappedPlaybackGrant);
     token.identity = identity;
 
+    // increment the viewer counter
+    await redisIncr('live_viewer_count');
+
     // Serialize the token to a JWT and return it to the client side
     return res.send({
       token: token.toJwt()
