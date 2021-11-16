@@ -7,6 +7,7 @@ const video = document.getElementsByTagName('video')[0];
 let streaming = false;
 let room;
 let streamDetails;
+let countUpdateTimer;
 
 let liveNotification = document.createElement('div');
 liveNotification.innerHTML = 'LIVE';
@@ -53,6 +54,11 @@ const startStream = async (streamName, identity) => {
   streaming = true;
 
   stream.insertBefore(liveNotification, video);
+  countUpdateTimer = setInterval(async () => {
+    const countResponse = await fetch('/audienceCount');
+    const countData = await countResponse.json();
+    liveNotification.innerText = `LIVE [${countData.count}]`;
+  }, 5000);
 
   startEndButton.disabled = false;
   startEndButton.classList.replace('bg-green-500', 'bg-red-500');
@@ -62,6 +68,8 @@ const startStream = async (streamName, identity) => {
 const endStream = async () => {
   // If streaming, end the stream
   if (streaming) {
+    clearInterval(countUpdateTimer);
+
     try {
       const response = await fetch('/end', {
         method: 'POST',

@@ -191,6 +191,15 @@ app.post('/audienceToken', async (req, res) => {
   }
 });
 
+/**
+ * Get the number of users watching the stream
+ */
+app.get('/audienceCount', async (req, res) => {
+  return res.send({
+    count: 123,
+  });
+});
+
 // Start the Express server
 app.listen(port, async () => {
   console.log(`Express server running on port ${port}`);
