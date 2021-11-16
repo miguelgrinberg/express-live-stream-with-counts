@@ -1,9 +1,11 @@
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { promisify } from 'util';
 import express from 'express';
 import crypto from 'crypto';
 import twilio from 'twilio';
+import redis from 'redis';
 
 dotenv.config();
 
@@ -21,6 +23,11 @@ const apiKey = process.env.TWILIO_API_KEY_SID;
 const apiKeySecret = process.env.TWILIO_API_KEY_SECRET;
 
 const twilioClient = twilio(apiKey, apiKeySecret, { accountSid: accountSid });
+const redisClient = redis.createClient();
+const redisGet = promisify(redisClient.get).bind(redisClient);
+const redisSet = promisify(redisClient.set).bind(redisClient);
+const redisIncr = promisify(redisClient.incr).bind(redisClient);
+const redisDecr = promisify(redisClient.decr).bind(redisClient);
 
 app.use(express.json());
 
@@ -66,6 +73,9 @@ app.post('/start', async (req, res) => {
         ],
       })
     })
+
+    // initialize viewer count
+    await redisSet('live_viewer_count', 0);
 
     return res.status(200).send({
       roomId: room.sid,
@@ -196,7 +206,7 @@ app.post('/audienceToken', async (req, res) => {
  */
 app.get('/audienceCount', async (req, res) => {
   return res.send({
-    count: 123,
+    count: await redisGet('live_viewer_count'),
   });
 });
 
